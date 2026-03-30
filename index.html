@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Travel-Oid – Doc's Real Guide to Reality</title>
+  <meta name="description" content="Travel-Oid. Doc's Real Guide to Reality in app form. Build your offline pack before you go. Real, ND-friendly, local-knowledge travel." />
+  <meta name="theme-color" content="#020617" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --deep: #022c3a;
+      --mid: #0369a1;
+      --accent: #14b8a6;
+      --highlight: #38bdf8;
+      --gold: #fbbf24;
+      --abyss: #020617;
+      --foam: #e0f2fe;
+      --sand: #fef3c7;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html { scroll-behavior: smooth; font-size: 18px; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 0 0, #0b1120, #020617 55%, #020617);
+      color: #e5e7eb;
+      line-height: 1.6;
+    }
+
+    .font-hand { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Caveat", cursive; }
+
+    .snap-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding-top: 80px;
+      padding-bottom: 32px;
+    }
+
+    .section-fade { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .section-fade.visible { opacity: 1; transform: translateY(0); }
+
+    .sticky-nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(2, 6, 23, 0.96);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .nav-pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      color: #9ca3af;
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      min-height: 44px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .nav-pill.active, .nav-pill:hover { background: rgba(56, 189, 248, 0.16); color: #e5e7eb; }
+
+    .dot-nav {
+      position: fixed;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 45;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .dot-nav-dot {
+      width: 10px; height: 10px; border-radius: 999px;
+      background: rgba(148, 163, 184, 0.4);
+      border: none; cursor: pointer; position: relative; padding: 0;
+      transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
+    }
+    .dot-nav-dot.active { background: var(--highlight); transform: scale(1.4); box-shadow: 0 0 10px rgba(56, 189, 248, 0.7); }
+    .dot-nav-dot::after {
+      content: attr(data-label);
+      position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
+      background: #020617; color: #e5e7eb; padding: 3px 8px; border-radius: 999px;
+      font-size: 0.7rem; font-weight: 600; white-space: nowrap;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .dot-nav-dot:hover::after { opacity: 1; }
+
+    .card {
+      background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.18), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(20, 184, 166, 0.18), transparent 55%),
+        rgba(15, 23, 42, 0.96);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      padding: 20px;
+    }
+
+    .card-offline {
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 18px;
+      border: 1px solid rgba(20, 184, 166, 0.4);
+      padding: 20px;
+    }
+
+    .btn {
+      min-height: 48px; padding: 10px 18px; border-radius: 999px; border: none;
+      cursor: pointer; font-weight: 600; font-size: 0.9rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      white-space: nowrap; transition: background 0.2s, color 0.2s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: linear-gradient(135deg, var(--mid), var(--accent)); color: white; }
+    .btn-outline { background: transparent; color: #e5e7eb; border: 1px solid rgba(148, 163, 184, 0.6); }
+    .btn-ghost { background: rgba(15, 23, 42, 0.7); color: #e5e7eb; border: 1px solid rgba(31, 41, 55, 0.8); }
+    .btn-gold { background: linear-gradient(135deg, #b45309, #d97706); color: white; }
+    .btn-danger { background: rgba(127, 29, 29, 0.8); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+    .upload-box {
+      background: rgba(15, 23, 42, 0.9); border: 2px dashed rgba(148, 163, 184, 0.7);
+      border-radius: 18px; padding: 30px 16px; text-align: center; cursor: pointer;
+      min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: background 0.2s, border-color 0.2s, transform 0.1s;
+    }
+    .upload-box:hover { border-color: var(--highlight); transform: translateY(-1px); }
+
+    .toggle-track {
+      width: 255px; height: 34px; border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(148, 163, 184, 0.7);
+      display: flex; position: relative; overflow: hidden;
+    }
+    .toggle-thumb {
+      position: absolute; top: 2px; bottom: 2px; width: calc(100% / 3 - 4px);
+      border-radius: 999px; background: linear-gradient(135deg, var(--mid), var(--accent)); transition: left 0.25s;
+    }
+    .toggle-option {
+      flex: 1; font-size: 0.7rem; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1; color: #9ca3af; cursor: pointer; user-select: none;
+    }
+    .toggle-option.active { color: #e5e7eb; }
+
+    .chip {
+      border-radius: 999px; padding: 6px 12px; font-size: 0.75rem; font-weight: 600;
+      border: 1px solid rgba(148, 163, 184, 0.6); color: #9ca3af;
+      background: rgba(15, 23, 42, 0.8); cursor: pointer; min-height: 34px;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .chip.active { background: rgba(56, 189, 248, 0.18); color: #e5e7eb; border-color: var(--highlight); }
+    .chip.interest-active { background: rgba(20, 184, 166, 0.22); color: #e5e7eb; border-color: var(--accent); }
+
+    .chat-messages { height: 320px; overflow-y: auto; padding: 12px; scroll-behavior: smooth; font-size: 0.9rem; }
+    .chat-msg { max-width: 85%; margin-bottom: 10px; padding: 10px 12px; border-radius: 14px; line-height: 1.5; word-wrap: break-word; }
+    .chat-msg.user { margin-left: auto; background: linear-gradient(135deg, var(--mid), var(--accent)); color: white; border-bottom-right-radius: 4px; }
+    .chat-msg.doc { margin-right: auto; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(148, 163, 184, 0.6); border-bottom-left-radius: 4px; }
+
+    .journal-entry {
+      background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(20, 184, 166, 0.3);
+      border-radius: 12px; padding: 12px; margin-bottom: 8px; font-size: 0.85rem;
+    }
+    .journal-meta { font-size: 0.65rem; color: #64748b; margin-top: 4px; }
+
+    .pack-phrase {
+      display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+      font-size: 0.8rem;
+    }
+    .pack-phrase:last-child { border-bottom: none; }
+
+    .online-dot {
+      width: 8px; height: 8px; border-radius: 999px; display: inline-block; margin-right: 4px;
+      transition: background 0.3s;
+    }
+    .online-dot.online { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+    .online-dot.offline { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+
+    .interest-section { border-left: 3px solid var(--accent); padding-left: 12px; margin-bottom: 16px; }
+
+    @media (max-width: 640px) {
+      html { font-size: 16px; }
+      .dot-nav { display: none; }
+      .card { padding: 16px; }
+      .chat-messages { height: 260px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="#pageHome" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-sky-600 text-white px-4 py-2 rounded z-50">
+    Skip to main content
+  </a>
+
+  <!-- Dot nav -->
+  <nav class="dot-nav" aria-label="Section navigation">
+    <button class="dot-nav-dot active" data-section="pageHome" data-label="Home" onclick="scrollToSection('pageHome')"></button>
+    <button class="dot-nav-dot" data-section="pageBuild" data-label="Build" onclick="scrollToSection('pageBuild')"></button>
+    <button class="dot-nav-dot" data-section="pageMyTrip" data-label="My Trip" onclick="scrollToSection('pageMyTrip')"></button>
+    <button class="dot-nav-dot" data-section="pageTrip" data-label="Trip AI" onclick="scrollToSection('pageTrip')"></button>
+    <button class="dot-nav-dot" data-section="pageDoc" data-label="Doc" onclick="scrollToSection('pageDoc')"></button>
+    <button class="dot-nav-dot" data-section="pageGear" data-label="Gear" onclick="scrollToSection('pageGear')"></button>
+    <button class="dot-nav-dot" data-section="pageVillage" data-label="-Oid" onclick="scrollToSection('pageVillage')"></button>
+  </nav>
+
+  <!-- Header / Home -->
+  <header id="pageHome" class="snap-page max-w-4xl mx-auto px-4">
+    <section class="section-fade">
+      <div class="rounded-3xl p-8 md:p-10 mb-6 relative overflow-hidden" style="background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.35), transparent 55%), radial-gradient(circle at 100% 100%, rgba(20, 184, 166, 0.4), transparent 55%), linear-gradient(145deg, #020617, #022c3a);">
+        <div class="relative z-10">
+          <p class="text-sm text-sky-300 mb-2 font-semibold">✈️ Travel-Oid – FeelFamous Village</p>
+          <h1 class="text-4xl md:text-5xl font-black text-white mb-2 tracking-tight">Doc's Real Guide to Reality</h1>
+          <p class="text-lg text-sky-100 mb-3 max-w-xl">Build your offline pack before you go. Works without data. Local knowledge, not tourist traps.</p>
+          <p class="font-hand text-xl text-amber-300 mb-4">"No trip is worth breaking yourself for."</p>
+          <div class="flex flex-wrap gap-3 mb-4">
+            <button class="btn btn-primary text-sm" onclick="scrollToSection('pageBuild')">Build my pack</button>
+            <button class="btn btn-ghost text-sm" onclick="scrollToSection('pageMyTrip')">My Trip</button>
+            <button class="btn btn-outline text-sm" onclick="scrollToSection('pageDoc')">Ask Doc</button>
+          </div>
+          <p class="text-xs text-sky-300">Built on the -Oid engine. Powered by Pumpkin. Your story, your infrastructure.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sticky nav -->
+    <nav class="sticky-nav">
+      <div class="max-w-4xl mx-auto px-3 py-2 flex gap-1 overflow-x-auto items-center">
+        <button class="nav-pill active" data-section="pageHome" onclick="scrollToSection('pageHome')">Home</button>
+        <button class="nav-pill" data-section="pageBuild" onclick="scrollToSection('pageBuild')">Build</button>
+        <button class="nav-pill" data-section="pageMyTrip" onclick="scrollToSection('pageMyTrip')">My Trip</button>
+        <button class="nav-pill" data-section="pageTrip" onclick="scrollToSection('pageTrip')">Trip AI</button>
+        <button class="nav-pill" data-section="pageDoc" onclick="scrollToSection('pageDoc')">Doc</button>
+        <button class="nav-pill" data-section="pageGear" onclick="scrollToSection('pageGear')">Gear</button>
+        <button class="nav-pill" data-section="pageVillage" onclick="scrollToSection('pageVillage')">Village</button>
+        <div class="ml-auto flex items-center gap-1 pr-1 shrink-0">
+          <span class="online-dot online" id="onlineDot"></span>
+          <span class="text-xs text-slate-400" id="onlineLabel">Online</span>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4">
+
+    <!-- ===== BUILD MY PACK ===== -->
+    <div id="pageBuild" class="snap-page">
+      <section class="section-fade mb-8">
+        <h2 class="text-3xl font-black text-white mb-1">Build My Pack</h2>
+        <p class="text-sky-300 mb-4">Tell Doc where you're going. He'll build you an offline pack — local knowledge, no tourist traps. Saved to your device.</p>
+
+        <div class="card mb-4">
+          <div class="space-y-4">
+            <!-- Destination -->
+            <div>
+              <label class="block text-xs font-semibold text-sky-200 mb-1">Where are you going?</label>
+              <input type="text" id="buildDest" placeholder="e.g. Bilbao, Spain"
+                class="w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-3 text-base text-sky-50 placeholder-slate-500 focus:outline-none focus:border-sky-400" />
+            </div>
+
+            <!-- Dates -->
+            <div>
+              <label class="block text-xs font-semibold text-sky-200 mb-1">When? (rough is fine)</label>
+              <input type="text" id="buildDates" placeholder="e.g. April 17-19 2026, or just April 2026"
+                class="w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2 text-sm text-sky-50 placeholder-slate-500 focus:outline-none focus:border-sky-400" />
+            </div>
+
+            <!-- Travel style -->
+            <div>
+              <label class="block text-xs font-semibold text-sky-200 mb-1">Who's travelling?</label>
+              <div class="flex flex-wrap gap-2">
+                <button class="chip active" data-style="solo, AuDHD-friendly, budget-conscious" onclick="setBuildStyle(this)">Solo</button>
+                <button class="chip" data-style="solo nomad, working remotely" onclick="setBuildStyle(this)">Nomad</button>
+                <button class="chip" data-style="travelling with kids" onclick="setBuildStyle(this)">With kids</button>
+                <button class="chip" data-style="travelling with mates" onclick="setBuildStyle(this)">With mates</button>
+              </div>
+            </div>
+
+            <!-- Interests -->
+            <div>
+              <label class="block text-xs font-semibold text-sky-200 mb-1">Your interests <span class="text-slate-500">(tap to select — Doc will add local spots)</span></label>
+              <div class="flex flex-wrap gap-2">
+                <button class="chip" data-interest="cannabis" onclick="toggleInterest(this)">🌿 Cannabis</button>
+                <button class="chip" data-interest="bridgewalker" onclick="toggleInterest(this)">🌉 Bridgewalker</button>
+                <button class="chip" data-interest="music" onclick="toggleInterest(this)">🎵 Music</button>
+                <button class="chip" data-interest="coins" onclick="toggleInterest(this)">🪙 Coins</button>
+                <button class="chip" data-interest="food" onclick="toggleInterest(this)">🍽️ Food</button>
+                <button class="chip" data-interest="photography" onclick="toggleInterest(this)">📷 Photography</button>
+                <button class="chip" data-interest="history" onclick="toggleInterest(this)">🏛️ History</button>
+                <button class="chip" data-interest="markets" onclick="toggleInterest(this)">🛍️ Markets</button>
+              </div>
+            </div>
+
+            <!-- Name (optional) -->
+            <div>
+              <label class="block text-xs font-semibold text-sky-200 mb-1">Your name (optional — Doc personalises the pack)</label>
+              <input type="text" id="buildName" placeholder="e.g. Doc Strange"
+                class="w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2 text-sm text-sky-50 placeholder-slate-500 focus:outline-none focus:border-sky-400" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="buildLoading" class="card mb-4 hidden text-center">
+          <div class="text-5xl mb-2 animate-spin">🌍</div>
+          <p class="text-sky-200 font-semibold">Doc's doing the deep dive…</p>
+          <p class="text-xs text-slate-400 mt-1">Local knowledge, not tourist traps. This can take 30 seconds.</p>
+        </div>
+
+        <!-- Error -->
+        <p id="buildError" class="text-xs text-red-400 mb-3 hidden"></p>
+
+        <!-- Build button -->
+        <button id="buildBtn" class="btn btn-primary w-full text-base" onclick="buildPack()">
+          Build My Offline Pack
+        </button>
+        <p class="text-xs text-slate-500 mt-2 text-center">Requires internet once. Then it lives on your device.</p>
+
+        <!-- Success -->
+        <div id="buildSuccess" class="card mt-4 hidden" style="border-color: rgba(20,184,166,0.5);">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="text-3xl">✅</div>
+            <div>
+              <p class="font-semibold text-teal-300">Pack built and saved to device</p>
+              <p class="text-xs text-slate-400" id="buildSuccessTitle"></p>
+            </div>
+          </div>
+          <button class="btn btn-primary text-sm" onclick="scrollToSection('pageMyTrip')">Go to My Trip →</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===== MY TRIP ===== -->
+    <div id="pageMyTrip" class="snap-page">
+      <section class="section-fade mb-8">
+        <div class="flex items-center justify-between mb-1">
+          <h2 class="text-3xl font-black text-white">My Trip</h2>
+          <div class="flex items-center gap-2">
+            <span class="online-dot online" id="myTripOnlineDot"></span>
+            <span class="text-xs text-slate-400" id="myTripOnlineLabel">Online</span>
+          </div>
+        </div>
+        <p class="text-sky-300 mb-4">Your offline pack. Works without data. Tap anything to expand.</p>
+
+        <!-- No pack state -->
+        <div id="noPackMsg" class="card text-center">
+          <div class="text-4xl mb-2">🗺️</div>
+          <p class="text-sky-200 font-semibold mb-2">No pack yet</p>
+          <p class="text-sm text-slate-400 mb-3">Build a pack before you go and it'll live here — even offline.</p>
+          <button class="btn btn-primary text-sm" onclick="scrollToSection('pageBuild')">Build My Pack</button>
+        </div>
+
+        <!-- Pack content (shown when pack exists) -->
+        <div id="packContent" class="hidden space-y-4">
+
+          <!-- Trip header -->
+          <div class="card" style="border-color: rgba(20,184,166,0.5);">
+            <h3 class="text-xl font-black text-teal-300" id="packTitle"></h3>
+            <p class="text-sm text-sky-100 mt-1" id="packSummary"></p>
+            <p class="text-xs text-slate-500 mt-2" id="packGenerated"></p>
+            <button class="btn btn-ghost text-xs mt-3" onclick="clearPack()">Clear pack</button>
+          </div>
+
+          <!-- Transport -->
+          <details class="card-offline" open>
+            <summary class="cursor-pointer font-semibold text-sky-100 flex items-center gap-2">
+              <span class="text-xl">🚇</span> Getting there
+            </summary>
+            <div id="packTransport" class="mt-3 space-y-3 text-sm"></div>
+          </details>
+
+          <!-- SIM -->
+          <details class="card-offline">
+            <summary class="cursor-pointer font-semibold text-sky-100 flex items-center gap-2">
+              <span class="text-xl">📱</span> Local SIM
+            </summary>
+            <div id="packSim" class="mt-3 text-sm"></div>
+          </details>
+
+          <!-- Neighbourhoods -->
+          <details class="card-offline">
+            <summary class="cursor-pointer font-semibold text-sky-100 flex items-center gap-2">
+              <span class="text-xl">🏘️</span> Where to stay
+            </summary>
+            <div id="packNeighbourhoods" class="mt-3 space-y-3 text-sm"></div>
+          </details>
+
+          <!-- Safety -->
+          <details class="card-offline">
+            <summary class="cursor-pointer font-semibold text-amber-200 flex items-center gap-2">
+              <span class="text-xl">🛡️</span> Safety &amp; sanity
+            </summary>
+            <div id="packSafety" class="mt-3 space-y-2 text-sm text-amber-100"></div>
+          </details>
+
+          <!-- Phrases -->
+          <details class="card-offline">
+            <summary class="cursor-pointer font-semibold text-sky-100 flex items-center gap-2">
+              <span class="text-xl">💬</span> Phrase card
+            </summary>
+            <div id="packPhrases" class="mt-3"></div>
+          </details>
+
+          <!-- Interests -->
+          <div id="packInterests"></div>
+
+          <!-- Emergency -->
+          <details class="card-offline">
+            <summary class="cursor-pointer font-semibold text-red-300 flex items-center gap-2">
+              <span class="text-xl">🆘</span> Emergency
+            </summary>
+            <div id="packEmergency" class="mt-3 space-y-2 text-sm"></div>
+          </details>
+
+          <!-- Doc's notes -->
+          <div id="packDocNotes" class="card hidden" style="border-color:rgba(251,191,36,0.4);">
+            <p class="text-xs text-amber-300 font-semibold mb-1">Doc says:</p>
+            <p class="text-sm text-amber-100 italic" id="packDocNotesText"></p>
+          </div>
+        </div>
+
+        <!-- Journal -->
+        <div class="mt-6">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xl font-black text-white">Journal</h3>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost text-xs" onclick="exportJournal()">Export</button>
+              <button class="btn btn-ghost text-xs text-red-400" onclick="clearJournal()">Clear</button>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">Your moments. Saved here, offline. Export as text for the book.</p>
+
+          <div class="flex gap-2 mb-4">
+            <textarea id="journalInput" placeholder="What just happened? Where are you? What did you see?"
+              class="flex-1 rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2 text-sm text-sky-50 placeholder-slate-500 focus:outline-none focus:border-sky-400 min-h-[70px]"></textarea>
+          </div>
+          <button class="btn btn-primary w-full text-base mb-4" onclick="addJournalEntry()">
+            Add Moment
+          </button>
+
+          <div id="journalList" class="space-y-2"></div>
+          <p id="journalEmpty" class="text-xs text-slate-500 text-center py-4">No moments yet. Start documenting.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===== TRIP AI (original feature, kept) ===== -->
+    <div id="pageTrip" class="snap-page">
+      <section class="section-fade mb-8">
+        <h2 class="text-3xl font-black text-white mb-1">One Image Trip Detective</h2>
+        <p class="text-sky-300 mb-4">Show Doc a screenshot or travel vibe photo. He'll build a trip that fits your budget, brain, and body.</p>
+
+        <div class="flex gap-2 mb-4">
+          <button id="modePlanBtn" class="btn btn-primary flex-1 text-xs" onclick="setMode('plan')">Plan my trip</button>
+          <button id="modeRoastBtn" class="btn btn-ghost flex-1 text-xs" onclick="setMode('roast')">Roast my itinerary</button>
+        </div>
+
+        <div class="card mb-4">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <p class="text-xs text-sky-200 mb-1 font-semibold">Budget vibe</p>
+              <div class="toggle-track" id="budgetTrack" onclick="cycleBudget(event)">
+                <div class="toggle-thumb" id="budgetThumb"></div>
+                <div class="toggle-option active" data-value="ultra-budget" id="budgetOption0">Ultra</div>
+                <div class="toggle-option" data-value="balanced" id="budgetOption1">Balanced</div>
+                <div class="toggle-option" data-value="treat" id="budgetOption2">Treat</div>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs text-sky-200 mb-1 font-semibold">Who's travelling?</p>
+              <div class="flex flex-wrap gap-2">
+                <button class="chip active" data-value="solo" onclick="setTravellerType('solo', this)">Solo</button>
+                <button class="chip" data-value="with-kids" onclick="setTravellerType('with-kids', this)">With kids</button>
+                <button class="chip" data-value="with-mates" onclick="setTravellerType('with-mates', this)">With mates</button>
+                <button class="chip" data-value="nomad" onclick="setTravellerType('nomad', this)">Nomad month+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4 mb-4">
+          <div class="upload-box" onclick="document.getElementById('cameraInput').click()">
+            <div class="text-4xl mb-1">📷</div>
+            <p class="font-semibold text-white text-sm">Camera / Screenshot</p>
+            <p class="text-xs text-sky-400 mt-1 max-w-xs">Snap the destination, your Skyscanner screen, or anything that screams "trip".</p>
+          </div>
+          <div class="upload-box" onclick="document.getElementById('galleryInput').click()">
+            <div class="text-4xl mb-1">🖼️</div>
+            <p class="font-semibold text-white text-sm">Upload / Choose image</p>
+            <p class="text-xs text-sky-400 mt-1 max-w-xs">Phone gallery, laptop screenshot, inspo image – all welcome.</p>
+          </div>
+        </div>
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(this)" />
+        <input type="file" id="galleryInput" accept="image/*" class="hidden" onchange="handleImageUpload(this)" />
+
+        <div class="mb-4">
+          <label for="extraNotes" class="block text-xs font-semibold text-sky-200 mb-1">Anything Doc should know?</label>
+          <textarea id="extraNotes" class="w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2 text-sm text-sky-50 placeholder-slate-500 focus:outline-none focus:border-sky-400 min-h-[70px]" placeholder="Origin city, rough dates, must‑include stopovers, things you can't cope with..."></textarea>
+        </div>
+
+        <div id="loadingView" class="card mb-4 hidden text-center">
+          <div class="text-5xl mb-2 animate-spin">🧭</div>
+          <p class="text-sky-200 font-semibold" id="loadingTitle">Doc's plotting the route…</p>
+          <p class="text-xs text-slate-400 mt-1" id="loadingMessage">Checking energy cost, chaos level, and reality.</p>
+          <p class="text-xs text-slate-500 mt-2">This can take up to 30 seconds. Your future self will thank you.</p>
+        </div>
+
+        <div id="resultView" class="card mb-4 hidden">
+          <div class="flex flex-col gap-2 mb-3">
+            <p class="text-xs text-sky-300 font-semibold">Suggested blueprint</p>
+            <h3 id="resultTitle" class="text-xl font-extrabold text-white"></h3>
+            <p id="resultSummary" class="text-sm text-sky-100"></p>
+          </div>
+          <div class="grid md:grid-cols-2 gap-3 mb-3">
+            <div class="bg-slate-900/70 rounded-xl p-3 border border-slate-700">
+              <h4 class="text-sm font-semibold text-sky-100 mb-1">Route &amp; flights</h4>
+              <div id="resultRoutes" class="text-xs text-slate-200 space-y-1"></div>
+            </div>
+            <div class="bg-slate-900/70 rounded-xl p-3 border border-slate-700">
+              <h4 class="text-sm font-semibold text-sky-100 mb-1">Stays &amp; workspaces</h4>
+              <div id="resultStays" class="text-xs text-slate-200 space-y-1"></div>
+            </div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-3 mb-3">
+            <div class="bg-slate-900/70 rounded-xl p-3 border border-slate-700">
+              <h4 class="text-sm font-semibold text-sky-100 mb-1">Doc's daily rhythm</h4>
+              <div id="resultRhythm" class="text-xs text-slate-200 space-y-1"></div>
+            </div>
+            <div class="bg-slate-900/70 rounded-xl p-3 border border-slate-700">
+              <h4 class="text-sm font-semibold text-amber-200 mb-1">Safety &amp; sanity check</h4>
+              <div id="resultSafety" class="text-xs text-amber-100 space-y-1"></div>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <button class="btn btn-primary text-xs" onclick="resetTrip()">Again</button>
+            <button class="btn btn-outline text-xs" onclick="shareResult()">Share result</button>
+          </div>
+        </div>
+        <p id="resultError" class="text-xs text-red-400 mt-2 hidden"></p>
+      </section>
+    </div>
+
+    <!-- Learn -->
+    <div id="pageLearn" class="snap-page">
+      <section class="section-fade mb-8">
+        <h2 class="text-3xl font-black text-white mb-1">Learn the Reality Rules</h2>
+        <p class="text-sky-300 mb-4">Pumpkin snippets. No fluff. Just the stuff that keeps you safe, sane, and travelling.</p>
+        <div class="grid md:grid-cols-3 gap-3">
+          <div class="card text-sm">
+            <h3 class="text-sky-100 font-semibold mb-1">Energy before itinerary</h3>
+            <p class="text-slate-200">Plan days around your energy, not the guidebook. One big thing, one backup, then rest.</p>
+          </div>
+          <div class="card text-sm">
+            <h3 class="text-sky-100 font-semibold mb-1">ND‑friendly by default</h3>
+            <p class="text-slate-200">Fewer moves, calmer areas, clear exits, noise control. If it feels too much, it is.</p>
+          </div>
+          <div class="card text-sm">
+            <h3 class="text-sky-100 font-semibold mb-1">Future‑you is watching</h3>
+            <p class="text-slate-200">Don't dump problems on tomorrow. Keep one spare outfit, one spare card, one spare day.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Doc chat -->
+    <div id="pageDoc" class="snap-page">
+      <section class="section-fade mb-8">
+        <h2 class="text-3xl font-black text-white mb-1">Ask Doc</h2>
+        <p class="text-sky-300 mb-4">Rag chew with The Traveller. Routes, safety, ND‑friendly tweaks, money reality. Saved to your journal automatically.</p>
+
+        <div class="card">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="text-3xl">🎒</div>
+              <div>
+                <p class="font-semibold text-sky-100">Doc – Travel-Oid</p>
+                <p class="text-xs text-slate-400">Hitchhiked Munich → Accrington. Been Bali to Blackpool.</p>
+              </div>
+            </div>
+            <button class="text-xs text-sky-300 underline" onclick="clearChat()">Clear chat</button>
+          </div>
+
+          <div id="chatMessages" class="chat-messages border border-slate-700/80 rounded-xl mb-3 bg-slate-950/60"></div>
+
+          <div class="flex gap-2 items-center">
+            <input type="text" id="chatInput" placeholder="Ask anything about a trip, route, or worry..."
+              class="flex-1 rounded-xl border border-slate-700 bg-slate-950/80 px-3 py-2 text-sm text-sky-50 placeholder-slate-500 focus:outline-none focus:border-sky-400"
+              onkeydown="if(event.key==='Enter'){sendChatMessage()}" aria-label="Your message to Doc" />
+            <button id="chatSendBtn" class="btn btn-primary text-xs" onclick="sendChatMessage()">Send</button>
+          </div>
+          <p class="text-[0.65rem] text-slate-500 mt-2">Doc is not a doctor or lawyer. Visa, law, and health questions always need official sources too.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- Gear -->
+    <div id="pageGear" class="snap-page">
+      <section class="section-fade mb-8">
+        <h2 class="text-3xl font-black text-white mb-1">Doc's kit list</h2>
+        <p class="text-sky-300 mb-4">Stuff that makes travel calmer, not flashier.</p>
+        <div class="grid md:grid-cols-2 gap-3 text-sm">
+          <div class="card">
+            <h3 class="text-sky-100 font-semibold mb-1">Core sanity kit</h3>
+            <ul class="list-disc pl-5 text-slate-200 space-y-1 text-xs">
+              <li><a href="https://www.amazon.co.uk/s?k=travel+ear+plugs&tag=chrisptee-21" target="_blank" class="underline text-sky-300">Ear plugs / defenders</a></li>
+              <li><a href="https://www.amazon.co.uk/s?k=travel+eye+mask&tag=chrisptee-21" target="_blank" class="underline text-sky-300">Soft eye mask</a></li>
+              <li><a href="https://www.amazon.co.uk/s?k=universal+travel+adapter&tag=chrisptee-21" target="_blank" class="underline text-sky-300">Universal travel adapter</a></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 class="text-sky-100 font-semibold mb-1">Mobile office</h3>
+            <ul class="list-disc pl-5 text-slate-200 space-y-1 text-xs">
+              <li><a href="https://www.amazon.co.uk/s?k=lightweight+laptop+stand&tag=chrisptee-21" target="_blank" class="underline text-sky-300">Light laptop stand</a></li>
+              <li><a href="https://www.amazon.co.uk/s?k=portable+keyboard&tag=chrisptee-21" target="_blank" class="underline text-sky-300">Compact keyboard</a></li>
+              <li><a href="https://www.amazon.co.uk/s?k=packing+cubes&tag=chrisptee-21" target="_blank" class="underline text-sky-300">Packing cubes</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Village -->
+    <div id="pageVillage" class="snap-page">
+      <section class="section-fade mb-8">
+        <h2 class="text-3xl font-black text-white mb-1">The -Oid Village</h2>
+        <p class="text-sky-300 mb-4">Same body, different heads. Travel-Oid joins the crew.</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+          <a href="https://magic-oid.co.uk" class="card text-center hover:border-sky-400 transition"><div class="text-2xl mb-1">🪄</div><p class="font-semibold">Magic-Oid</p></a>
+          <a href="https://cannabin-oid.co.uk" class="card text-center hover:border-sky-400 transition"><div class="text-2xl mb-1">🌿</div><p class="font-semibold">Cannabin-Oid</p></a>
+          <a href="https://radi-oid.co.uk" class="card text-center hover:border-sky-400 transition"><div class="text-2xl mb-1">📻</div><p class="font-semibold">Radi-Oid</p></a>
+          <a href="https://motor-oid.co.uk" class="card text-center hover:border-sky-400 transition"><div class="text-2xl mb-1">🔧</div><p class="font-semibold">Motor-Oid</p></a>
+          <div class="card text-center border-amber-400/80 bg-slate-900/80">
+            <div class="text-2xl mb-1">✈️</div>
+            <p class="font-semibold text-amber-300">Travel-Oid</p>
+            <p class="text-[0.65rem] text-amber-200 mt-1">You're here.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-slate-800 mt-4">
+    <div class="max-w-4xl mx-auto px-4 py-4 text-xs text-slate-500">
+      <p>Built by Chris P Tee with Doc and Pumpkin. Part of the FeelFamous ecosystem. Your story, your infrastructure.</p>
+    </div>
+  </footer>
+
+  <script>
+    // ===== SERVICE WORKER =====
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
+    // ===== ONLINE/OFFLINE =====
+    function updateOnlineStatus() {
+      const online = navigator.onLine;
+      ['onlineDot', 'myTripOnlineDot'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.className = 'online-dot ' + (online ? 'online' : 'offline'); }
+      });
+      ['onlineLabel', 'myTripOnlineLabel'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = online ? 'Online' : 'Offline — pack still works'; }
+      });
+    }
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+
+    // ===== NAV =====
+    function scrollToSection(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.querySelectorAll('.nav-pill').forEach(b => b.classList.toggle('active', b.getAttribute('data-section') === id));
+      document.querySelectorAll('.dot-nav-dot').forEach(d => d.classList.toggle('active', d.getAttribute('data-section') === id));
+    }
+
+    // ===== BUILD PACK =====
+    let buildStyle = 'solo, AuDHD-friendly, budget-conscious';
+    const selectedInterests = new Set();
+
+    function setBuildStyle(btn) {
+      document.querySelectorAll('#pageBuild .chip[data-style]').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      buildStyle = btn.getAttribute('data-style');
+    }
+
+    function toggleInterest(btn) {
+      const interest = btn.getAttribute('data-interest');
+      if (selectedInterests.has(interest)) {
+        selectedInterests.delete(interest);
+        btn.classList.remove('interest-active');
+      } else {
+        selectedInterests.add(interest);
+        btn.classList.add('interest-active');
+      }
+    }
+
+    async function buildPack() {
+      const dest = document.getElementById('buildDest').value.trim();
+      if (!dest) {
+        showBuildError('Where are you going? Fill in a destination first.');
+        return;
+      }
+      if (!navigator.onLine) {
+        showBuildError('You need internet to build the pack. Get online, build it once, then it lives offline.');
+        return;
+      }
+
+      document.getElementById('buildLoading').classList.remove('hidden');
+      document.getElementById('buildSuccess').classList.add('hidden');
+      document.getElementById('buildError').classList.add('hidden');
+      document.getElementById('buildBtn').disabled = true;
+
+      const payload = {
+        destination: dest,
+        dates: document.getElementById('buildDates').value.trim(),
+        travelStyle: buildStyle,
+        interests: Array.from(selectedInterests),
+        userName: document.getElementById('buildName').value.trim() || 'Doc Strange',
+      };
+
+      try {
+        const res = await fetch('/.netlify/functions/build-trip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+
+        document.getElementById('buildLoading').classList.add('hidden');
+        document.getElementById('buildBtn').disabled = false;
+
+        if (data.error) { showBuildError(data.error); return; }
+
+        // Add metadata
+        data.generatedAt = new Date().toISOString();
+        data.interests_selected = Array.from(selectedInterests);
+        localStorage.setItem('traveloid_trip', JSON.stringify(data));
+
+        document.getElementById('buildSuccessTitle').textContent = data.title || dest;
+        document.getElementById('buildSuccess').classList.remove('hidden');
+        renderPack(data);
+      } catch (e) {
+        document.getElementById('buildLoading').classList.add('hidden');
+        document.getElementById('buildBtn').disabled = false;
+        showBuildError('Something went wrong. Check your connection and try again.');
+      }
+    }
+
+    function showBuildError(msg) {
+      const el = document.getElementById('buildError');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+
+    // ===== RENDER PACK =====
+    function renderPack(pack) {
+      if (!pack) return;
+
+      document.getElementById('noPackMsg').classList.add('hidden');
+      document.getElementById('packContent').classList.remove('hidden');
+
+      document.getElementById('packTitle').textContent = pack.title || pack.destination || 'My Trip';
+      document.getElementById('packSummary').textContent = pack.summary || '';
+      document.getElementById('packGenerated').textContent = pack.generatedAt ? 'Built: ' + new Date(pack.generatedAt).toLocaleDateString() : '';
+
+      // Transport
+      const tEl = document.getElementById('packTransport');
+      tEl.innerHTML = '';
+      (pack.transport || []).forEach(t => {
+        tEl.innerHTML += `<div class="border-b border-slate-700/50 pb-2 mb-2 last:border-0 last:mb-0">
+          <p class="font-semibold text-sky-100">${t.label || ''}</p>
+          <p class="text-slate-300">${t.method || ''} — ${t.detail || ''}</p>
+          ${t.cost ? `<p class="text-teal-300 text-xs mt-1">${t.cost}</p>` : ''}
+        </div>`;
+      });
+      if (!pack.transport || pack.transport.length === 0) tEl.innerHTML = '<p class="text-slate-400">No transport data.</p>';
+
+      // SIM
+      const simEl = document.getElementById('packSim');
+      if (pack.sim) {
+        simEl.innerHTML = `<p class="text-slate-300 mb-2">${pack.sim.advice || ''}</p>
+          ${pack.sim.bestOption ? `<p class="text-teal-300 font-semibold">Best option: ${pack.sim.bestOption}</p>` : ''}`;
+      } else {
+        simEl.innerHTML = '<p class="text-slate-400">No SIM data.</p>';
+      }
+
+      // Neighbourhoods
+      const nEl = document.getElementById('packNeighbourhoods');
+      nEl.innerHTML = '';
+      (pack.neighbourhoods || []).forEach(n => {
+        nEl.innerHTML += `<div class="border-b border-slate-700/50 pb-2 mb-2 last:border-0">
+          <p class="font-semibold text-sky-100">${n.name}${n.stayHere ? ' <span class="text-teal-300 text-xs">★ Stay here</span>' : ''}</p>
+          <p class="text-slate-300 text-xs">${n.vibe || ''}</p>
+          ${n.notes ? `<p class="text-slate-400 text-xs mt-1">${n.notes}</p>` : ''}
+        </div>`;
+      });
+
+      // Safety
+      const safeEl = document.getElementById('packSafety');
+      safeEl.innerHTML = '';
+      (pack.safety || []).forEach(s => {
+        safeEl.innerHTML += `<p>• ${s}</p>`;
+      });
+
+      // Phrases
+      const phEl = document.getElementById('packPhrases');
+      phEl.innerHTML = '';
+      (pack.phrases || []).forEach(ph => {
+        phEl.innerHTML += `<div class="pack-phrase">
+          <div class="flex-1">
+            <p class="text-slate-200">${ph.en}</p>
+            <p class="text-teal-300 font-semibold">${ph.local}</p>
+            ${ph.phonetic ? `<p class="text-slate-500 text-xs">${ph.phonetic}</p>` : ''}
+          </div>
+          <div class="text-xs text-slate-500 text-right max-w-[100px]">${ph.use || ''}</div>
+        </div>`;
+      });
+
+      // Interests
+      const iEl = document.getElementById('packInterests');
+      iEl.innerHTML = '';
+      const interests = pack.interests || {};
+      const interestEmojis = { cannabis: '🌿', bridgewalker: '🌉', music: '🎵', coins: '🪙', food: '🍽️', photography: '📷', history: '🏛️', markets: '🛍️' };
+      const interestLabels = { cannabis: 'Cannabis', bridgewalker: 'Bridgewalker spots', music: 'Music', coins: 'Coins', food: 'Food', photography: 'Photography', history: 'History', markets: 'Markets' };
+
+      Object.keys(interests).forEach(key => {
+        const data = interests[key];
+        if (!data) return;
+        const emoji = interestEmojis[key] || '📌';
+        const label = interestLabels[key] || key;
+
+        let html = `<details class="card-offline mb-3"><summary class="cursor-pointer font-semibold text-sky-100 flex items-center gap-2"><span class="text-xl">${emoji}</span> ${label}</summary><div class="mt-3 interest-section text-sm">`;
+
+        if (key === 'cannabis') {
+          if (data.legalStatus) html += `<p class="text-amber-200 text-xs mb-2 font-semibold">${data.legalStatus}</p>`;
+          if (data.howToAccess) html += `<p class="text-slate-300 mb-3">${data.howToAccess}</p>`;
+          (data.clubs || []).forEach(c => {
+            html += `<div class="mb-2"><p class="font-semibold text-teal-300">${c.name || 'Club'}</p><p class="text-xs text-slate-400">${c.area || ''} — ${c.notes || ''}</p></div>`;
+          });
+          (data.tips || []).forEach(t => { html += `<p class="text-xs text-slate-400 mt-1">• ${t}</p>`; });
+        } else if (key === 'bridgewalker') {
+          (data.spots || []).forEach(s => {
+            html += `<div class="mb-2"><p class="font-semibold text-teal-300">${s.name}</p><p class="text-xs text-slate-400">${s.type || ''} · ${s.area || ''} — ${s.notes || ''}</p></div>`;
+          });
+          (data.tips || []).forEach(t => { html += `<p class="text-xs text-slate-400 mt-1">• ${t}</p>`; });
+        } else if (key === 'music') {
+          (data.venues || []).forEach(v => {
+            html += `<div class="mb-2"><p class="font-semibold text-teal-300">${v.name}</p><p class="text-xs text-slate-400">${v.type || ''} · ${v.area || ''} — ${v.notes || ''}</p></div>`;
+          });
+          (data.tips || []).forEach(t => { html += `<p class="text-xs text-slate-400 mt-1">• ${t}</p>`; });
+        } else if (key === 'food') {
+          if (data.dishes && data.dishes.length) html += `<p class="text-teal-300 text-xs font-semibold mb-1">Try: ${data.dishes.join(', ')}</p>`;
+          (data.spots || []).forEach(s => {
+            html += `<div class="mb-2"><p class="font-semibold text-sky-100">${s.name}</p><p class="text-xs text-slate-400">${s.type || ''} · ${s.area || ''} — ${s.notes || ''}</p></div>`;
+          });
+          (data.tips || []).forEach(t => { html += `<p class="text-xs text-slate-400 mt-1">• ${t}</p>`; });
+        } else if (key === 'photography') {
+          (data.spots || []).forEach(s => {
+            html += `<div class="mb-2"><p class="font-semibold text-sky-100">${s.name}</p><p class="text-xs text-slate-400">${s.area || ''} — ${s.notes || ''}</p></div>`;
+          });
+          (data.tips || []).forEach(t => { html += `<p class="text-xs text-slate-400 mt-1">• ${t}</p>`; });
+        } else if (key === 'coins') {
+          (data.shops || []).forEach(s => {
+            html += `<div class="mb-2"><p class="font-semibold text-sky-100">${s.name}</p><p class="text-xs text-slate-400">${s.area || ''} — ${s.notes || ''}</p></div>`;
+          });
+          (data.tips || []).forEach(t => { html += `<p class="text-xs text-slate-400 mt-1">• ${t}</p>`; });
+        } else {
+          // Generic fallback
+          html += `<pre class="text-xs text-slate-400 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        html += '</div></details>';
+        iEl.innerHTML += html;
+      });
+
+      // Emergency
+      const emEl = document.getElementById('packEmergency');
+      emEl.innerHTML = '';
+      const em = pack.emergency || {};
+      if (em.police) emEl.innerHTML += `<p><span class="text-red-300 font-semibold">Police/Emergency:</span> ${em.police}</p>`;
+      if (em.medical) emEl.innerHTML += `<p><span class="text-red-300 font-semibold">Medical:</span> ${em.medical}</p>`;
+      if (em.embassy) emEl.innerHTML += `<p><span class="text-red-300 font-semibold">Embassy:</span> ${em.embassy}</p>`;
+      if (em.lostPassport) emEl.innerHTML += `<p class="text-xs text-slate-400 mt-1">${em.lostPassport}</p>`;
+
+      // Doc notes
+      if (pack.docNotes) {
+        document.getElementById('packDocNotesText').textContent = pack.docNotes;
+        document.getElementById('packDocNotes').classList.remove('hidden');
+      }
+    }
+
+    function clearPack() {
+      if (!confirm('Clear the saved pack? You can rebuild it anytime with internet.')) return;
+      localStorage.removeItem('traveloid_trip');
+      document.getElementById('noPackMsg').classList.remove('hidden');
+      document.getElementById('packContent').classList.add('hidden');
+    }
+
+    // ===== JOURNAL =====
+    function loadJournal() {
+      const entries = JSON.parse(localStorage.getItem('traveloid_journal') || '[]');
+      const list = document.getElementById('journalList');
+      const empty = document.getElementById('journalEmpty');
+      list.innerHTML = '';
+      if (entries.length === 0) { empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      entries.slice().reverse().forEach((e, i) => {
+        const div = document.createElement('div');
+        div.className = 'journal-entry';
+        div.innerHTML = `<p class="text-slate-200">${e.text}</p>
+          <p class="journal-meta">${e.time}${e.geo ? ' · ' + e.geo : ''}</p>`;
+        list.appendChild(div);
+      });
+    }
+
+    function addJournalEntry() {
+      const input = document.getElementById('journalInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const entry = {
+        text,
+        time: new Date().toLocaleString(),
+        geo: '',
+      };
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          entry.geo = pos.coords.latitude.toFixed(4) + ',' + pos.coords.longitude.toFixed(4);
+          saveJournalEntry(entry);
+        }, () => saveJournalEntry(entry), { timeout: 3000 });
+      } else {
+        saveJournalEntry(entry);
+      }
+
+      input.value = '';
+    }
+
+    function saveJournalEntry(entry) {
+      const entries = JSON.parse(localStorage.getItem('traveloid_journal') || '[]');
+      entries.push(entry);
+      localStorage.setItem('traveloid_journal', JSON.stringify(entries));
+      loadJournal();
+    }
+
+    function exportJournal() {
+      const entries = JSON.parse(localStorage.getItem('traveloid_journal') || '[]');
+      if (!entries.length) { alert('No journal entries yet.'); return; }
+      const pack = JSON.parse(localStorage.getItem('traveloid_trip') || '{}');
+      const header = `Doc's Real Guide to Reality — ${pack.title || 'Journey Journal'}\nExported: ${new Date().toLocaleDateString()}\n\n---\n\n`;
+      const text = header + entries.map(e => `[${e.time}${e.geo ? ' · ' + e.geo : ''}]\n${e.text}`).join('\n\n---\n\n');
+      const blob = new Blob([text], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'travel-oid-journal.txt';
+      a.click();
+    }
+
+    function clearJournal() {
+      if (!confirm('Clear all journal entries?')) return;
+      localStorage.removeItem('traveloid_journal');
+      loadJournal();
+    }
+
+    // ===== TRIP AI (existing, unchanged) =====
+    let mode = 'plan';
+    let budgetIndex = 0;
+    let travellerType = 'solo';
+    let currentImageData = null;
+
+    function setMode(newMode) {
+      mode = newMode;
+      document.getElementById('modePlanBtn').classList.toggle('btn-primary', mode === 'plan');
+      document.getElementById('modePlanBtn').classList.toggle('btn-ghost', mode !== 'plan');
+      document.getElementById('modeRoastBtn').classList.toggle('btn-primary', mode === 'roast');
+      document.getElementById('modeRoastBtn').classList.toggle('btn-ghost', mode !== 'roast');
+    }
+
+    function updateBudgetThumb() {
+      const thumb = document.getElementById('budgetThumb');
+      thumb.style.left = 2 + budgetIndex * (100 / 3) + '%';
+      for (let i = 0; i < 3; i++) {
+        document.getElementById('budgetOption' + i).classList.toggle('active', i === budgetIndex);
+      }
+    }
+
+    function cycleBudget() { budgetIndex = (budgetIndex + 1) % 3; updateBudgetThumb(); }
+
+    function setTravellerType(value, btn) {
+      travellerType = value;
+      document.querySelectorAll('#pageTrip .chip[data-value]').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function handleImageUpload(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => { currentImageData = reader.result.split(',')[1]; callAnalyze(); };
+      reader.readAsDataURL(file);
+    }
+
+    function showLoading(message) {
+      document.getElementById('loadingView').classList.remove('hidden');
+      document.getElementById('resultView').classList.add('hidden');
+      document.getElementById('resultError').classList.add('hidden');
+      if (message) document.getElementById('loadingMessage').textContent = message;
+    }
+    function hideLoading() { document.getElementById('loadingView').classList.add('hidden'); }
+
+    async function callAnalyze() {
+      if (!currentImageData) return;
+      showLoading();
+      const budgetMap = ['ultra-budget', 'balanced', 'treat'];
+      const payload = { image: { data: currentImageData, mediaType: 'image/jpeg' }, mode, budgetLevel: budgetMap[budgetIndex], travellerType, notes: document.getElementById('extraNotes').value || '' };
+      try {
+        const res = await fetch('/.netlify/functions/analyze-travel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        hideLoading();
+        if (data.error) { showTripError(data.error); return; }
+        renderResult(data);
+      } catch (e) {
+        hideLoading();
+        showTripError('Doc dropped the map. Try again in a moment.');
+      }
+    }
+
+    function showTripError(msg) {
+      const el = document.getElementById('resultError');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+
+    function renderResult(result) {
+      document.getElementById('resultTitle').textContent = result.title || 'Doc\'s rough blueprint';
+      document.getElementById('resultSummary').textContent = result.summary || '';
+      const routesEl = document.getElementById('resultRoutes');
+      routesEl.innerHTML = '';
+      (result.routes || []).forEach(rt => {
+        const p = document.createElement('p');
+        p.textContent = (rt.label ? rt.label + ': ' : '') + (rt.legs || []).map(l => `${l.from} → ${l.to}`).join(' / ') + (rt.estimatedCost ? ` (${rt.estimatedCost})` : '');
+        routesEl.appendChild(p);
+      });
+      const staysEl = document.getElementById('resultStays');
+      staysEl.innerHTML = '';
+      (result.stays || []).forEach(s => {
+        const p = document.createElement('p');
+        p.textContent = `${s.city} – ${s.nights || '?'} nights ${s.area ? '(' + s.area + ')' : ''}${s.vibe ? ' – ' + s.vibe : ''}`;
+        staysEl.appendChild(p);
+      });
+      const rhythmEl = document.getElementById('resultRhythm');
+      rhythmEl.innerHTML = '';
+      (result.dailyRhythm?.suggestedPattern || []).forEach(line => {
+        const p = document.createElement('p'); p.textContent = line; rhythmEl.appendChild(p);
+      });
+      const safetyEl = document.getElementById('resultSafety');
+      safetyEl.innerHTML = '';
+      (result.safetyAndSanity?.points || []).forEach(line => {
+        const p = document.createElement('p'); p.textContent = '• ' + line; safetyEl.appendChild(p);
+      });
+      document.getElementById('resultView').classList.remove('hidden');
+    }
+
+    function resetTrip() {
+      currentImageData = null;
+      document.getElementById('resultView').classList.add('hidden');
+      document.getElementById('resultError').classList.add('hidden');
+      document.getElementById('extraNotes').value = '';
+    }
+
+    function shareResult() { alert('Share image coming soon.'); }
+
+    // ===== DOC CHAT =====
+    const chatMessagesEl = document.getElementById('chatMessages');
+
+    function appendChatMessage(text, role) {
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + role;
+      div.textContent = text;
+      chatMessagesEl.appendChild(div);
+      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    }
+
+    function saveChatToJournal(question, answer) {
+      const entry = {
+        text: `[Doc Chat]\nQ: ${question}\nA: ${answer}`,
+        time: new Date().toLocaleString(),
+        geo: '',
+      };
+      const entries = JSON.parse(localStorage.getItem('traveloid_journal') || '[]');
+      entries.push(entry);
+      localStorage.setItem('traveloid_journal', JSON.stringify(entries));
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      appendChatMessage(text, 'user');
+      document.getElementById('chatSendBtn').disabled = true;
+
+      try {
+        const history = Array.from(chatMessagesEl.querySelectorAll('.chat-msg')).map(m => ({
+          role: m.classList.contains('user') ? 'user' : 'model',
+          text: m.textContent,
+        }));
+        const res = await fetch('/.netlify/functions/chat-travel', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: text, history }),
+        });
+        const data = await res.json();
+        const answer = data.answer || 'Doc\'s gone quiet. Try again.';
+        appendChatMessage(answer, 'doc');
+        saveChatToJournal(text, answer);
+      } catch (e) {
+        appendChatMessage('Something glitched. Doc will try again if you resend.', 'doc');
+      } finally {
+        document.getElementById('chatSendBtn').disabled = false;
+      }
+    }
+
+    function clearChat() { chatMessagesEl.innerHTML = ''; }
+
+    // ===== INIT =====
+    function init() {
+      updateBudgetThumb();
+
+      // Load saved pack
+      const savedPack = localStorage.getItem('traveloid_trip');
+      if (savedPack) {
+        try { renderPack(JSON.parse(savedPack)); } catch(e) {}
+      }
+
+      // Load journal
+      loadJournal();
+
+      // Fade observer
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
+    }
+
+    init();
+  </script>
+</body>
+</html>
