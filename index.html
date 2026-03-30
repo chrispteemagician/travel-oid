@@ -384,6 +384,31 @@
         </div>
         <p class="text-sky-300 mb-4">Your offline pack. Works without data. Tap anything to expand.</p>
 
+        <!-- Compass & Map -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-lg font-black text-white">Where Am I</h3>
+            <button class="btn btn-primary text-xs" onclick="initLocation()">Find Me</button>
+          </div>
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div class="card-offline flex flex-col items-center justify-center py-4">
+              <canvas id="compassCanvas" width="120" height="120"></canvas>
+              <p class="text-xs text-slate-400 mt-2" id="compassHeading">Tap Find Me</p>
+              <button id="compassPermBtn" class="btn btn-ghost text-xs mt-2 hidden" onclick="requestCompassPermission()">Allow compass</button>
+            </div>
+            <div class="card-offline flex flex-col justify-center gap-2 text-sm">
+              <div><p class="text-xs text-slate-500">Latitude</p><p class="font-semibold text-teal-300" id="locLat">—</p></div>
+              <div><p class="text-xs text-slate-500">Longitude</p><p class="font-semibold text-teal-300" id="locLng">—</p></div>
+              <div><p class="text-xs text-slate-500">Accuracy</p><p class="text-sky-200 text-xs" id="locAccuracy">—</p></div>
+              <div><p class="text-xs text-slate-500">what3words</p><p class="text-sky-200 text-xs" id="locW3W">tap Find Me</p></div>
+            </div>
+          </div>
+          <div id="mapContainer" class="rounded-xl overflow-hidden hidden" style="height:220px;">
+            <div id="leafletMap" style="height:100%;width:100%;"></div>
+          </div>
+          <p class="text-xs text-slate-500 mt-2" id="mapOfflineNote"></p>
+        </div>
+
         <!-- No pack state -->
         <div id="noPackMsg" class="card text-center">
           <div class="text-4xl mb-2">🗺️</div>
@@ -459,44 +484,6 @@
             <p class="text-xs text-amber-300 font-semibold mb-1">Doc says:</p>
             <p class="text-sm text-amber-100 italic" id="packDocNotesText"></p>
           </div>
-        </div>
-
-        <!-- Compass & Map -->
-        <div class="mt-6 mb-6">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-xl font-black text-white">Where Am I</h3>
-            <button class="btn btn-ghost text-xs" onclick="initLocation()">Find Me</button>
-          </div>
-          <p class="text-xs text-slate-400 mb-3">Compass + location. Works offline — uses your device sensors.</p>
-          <div class="grid grid-cols-2 gap-3 mb-3">
-            <div class="card-offline flex flex-col items-center justify-center py-4">
-              <canvas id="compassCanvas" width="120" height="120"></canvas>
-              <p class="text-xs text-slate-400 mt-2" id="compassHeading">Tap Find Me</p>
-              <button id="compassPermBtn" class="btn btn-ghost text-xs mt-2 hidden" onclick="requestCompassPermission()">Allow compass</button>
-            </div>
-            <div class="card-offline flex flex-col justify-center gap-2 text-sm">
-              <div>
-                <p class="text-xs text-slate-500">Latitude</p>
-                <p class="font-semibold text-teal-300" id="locLat">—</p>
-              </div>
-              <div>
-                <p class="text-xs text-slate-500">Longitude</p>
-                <p class="font-semibold text-teal-300" id="locLng">—</p>
-              </div>
-              <div>
-                <p class="text-xs text-slate-500">Accuracy</p>
-                <p class="text-sky-200 text-xs" id="locAccuracy">—</p>
-              </div>
-              <div>
-                <p class="text-xs text-slate-500">what3words area</p>
-                <p class="text-sky-200 text-xs" id="locW3W">tap Find Me</p>
-              </div>
-            </div>
-          </div>
-          <div id="mapContainer" class="rounded-xl overflow-hidden hidden" style="height:220px;">
-            <div id="leafletMap" style="height:100%;width:100%;"></div>
-          </div>
-          <p class="text-xs text-slate-500 mt-2" id="mapOfflineNote"></p>
         </div>
 
         <!-- Journal -->
