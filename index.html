@@ -1153,7 +1153,12 @@
       // Load saved pack
       const savedPack = localStorage.getItem('traveloid_trip');
       if (savedPack) {
-        try { renderPack(JSON.parse(savedPack)); } catch(e) {}
+        try {
+          renderPack(JSON.parse(savedPack));
+        } catch(e) {
+          localStorage.removeItem('traveloid_trip');
+          document.getElementById('noPackMsg').innerHTML = '<div class="text-4xl mb-2">⚠️</div><p class="text-amber-300 font-semibold mb-2">Previous pack was corrupted — cleared.</p><p class="text-sm text-slate-400 mb-3">Rebuild it and it\'ll save cleanly this time.</p><button class="btn btn-primary text-sm" onclick="scrollToSection(\'pageBuild\')">Rebuild My Pack</button>';
+        }
       }
 
       // Load journal
