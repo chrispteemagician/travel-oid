@@ -1432,7 +1432,7 @@
       const el = document.getElementById('locW3W');
       if (!navigator.onLine) { el.textContent = 'offline — use coordinates above'; return; }
       try {
-        const res = await fetch(`/.netlify/functions/what3words?lat=${lat}&lng=${lng}`);
+        const res = await fetch(`https://api.what3words.com/v3/convert-to-3wa?coordinates=${lat},${lng}&language=en&key=R7VL7Q93`);
         const data = await res.json();
         el.textContent = data.words ? '///' + data.words : 'unavailable';
       } catch(e) {
