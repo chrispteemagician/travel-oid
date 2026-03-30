@@ -1,5 +1,5 @@
 // Travel-Oid Service Worker — offline shell cache
-const CACHE = "traveloid-v2";
+const CACHE = "traveloid-v3";
 const SHELL = ["/", "/index.html"];
 
 self.addEventListener("install", e => {
