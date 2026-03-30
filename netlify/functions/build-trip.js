@@ -16,7 +16,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const apiKey = process.env.GEMINIAPIKEY || process.env.GOOGLEAIAPIKEY || process.env.GOOGLEAPIKEY;
+    const apiKey = process.env.GEMINIAPIKEY || process.env.GEMINI_API_KEY || process.env.GOOGLEAIAPIKEY || process.env.GOOGLEAPIKEY;
     if (!apiKey) {
       return { statusCode: 500, headers, body: JSON.stringify({ error: "API key not configured" }) };
     }
