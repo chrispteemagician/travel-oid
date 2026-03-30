@@ -1404,7 +1404,8 @@
         document.getElementById('locLat').textContent = lat.toFixed(5);
         document.getElementById('locLng').textContent = lng.toFixed(5);
         document.getElementById('locAccuracy').textContent = '±' + Math.round(acc) + 'm';
-        document.getElementById('locW3W').textContent = latLngToApproxW3W(lat, lng);
+        document.getElementById('locW3W').textContent = '///looking…';
+        fetchW3W(lat, lng);
 
         // Map
         if (navigator.onLine) {
@@ -1428,14 +1429,16 @@
       }, { enableHighAccuracy: true, timeout: 10000 });
     }
 
-    // Approximate what3words-style grid reference (not real w3w — just a grid cell label for offline use)
-    function latLngToApproxW3W(lat, lng) {
-      const latCells = ['alpha','bravo','charlie','delta','echo','foxtrot','golf','hotel','india','juliet','kilo','lima','mike','november','oscar','papa','quebec','romeo','sierra','tango','uniform','victor','whiskey','xray','yankee','zulu'];
-      const lngCells = ['amber','bronze','copper','denim','ember','flame','grove','haven','inlet','jungle','ketch','linden','marsh','noble','ocean','pebble','quarry','river','stone','timber','urban','valley','warden','xeric','yarrow','zenith'];
-      const latIdx = Math.abs(Math.floor((lat + 90) * latCells.length / 180)) % latCells.length;
-      const lngIdx = Math.abs(Math.floor((lng + 180) * lngCells.length / 360)) % lngCells.length;
-      const sub = Math.floor((lat % 1 + 1) * 100) % 100;
-      return latCells[latIdx] + '.' + lngCells[lngIdx] + '.' + sub;
+    async function fetchW3W(lat, lng) {
+      const el = document.getElementById('locW3W');
+      if (!navigator.onLine) { el.textContent = 'offline — use coordinates above'; return; }
+      try {
+        const res = await fetch(`/.netlify/functions/what3words?lat=${lat}&lng=${lng}`);
+        const data = await res.json();
+        el.textContent = data.words ? '///' + data.words : 'unavailable';
+      } catch(e) {
+        el.textContent = 'unavailable';
+      }
     }
   </script>
 </body>
