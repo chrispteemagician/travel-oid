@@ -1,5 +1,4 @@
 // netlify/functions/build-trip.js
-const fetch = require("node-fetch");
 
 exports.handler = async (event) => {
   const headers = {
