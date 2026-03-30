@@ -11,6 +11,8 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     :root {
@@ -198,6 +200,23 @@
       .card { padding: 16px; }
       .chat-messages { height: 260px; }
     }
+    @keyframes globe-spin {
+      0%   { transform: rotate(0deg) scale(1); }
+      50%  { transform: rotate(180deg) scale(1.1); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+    .globe-rotate { animation: globe-spin 3s linear infinite; display: inline-block; }
+
+    @keyframes joke-fade {
+      0%   { opacity: 0; transform: translateY(6px); }
+      15%  { opacity: 1; transform: translateY(0); }
+      85%  { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-6px); }
+    }
+    .joke-animate { animation: joke-fade 4s ease-in-out forwards; }
+
+    #compassCanvas { border-radius: 50%; background: rgba(15,23,42,0.9); }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -322,9 +341,14 @@
 
         <!-- Loading -->
         <div id="buildLoading" class="card mb-4 hidden text-center">
-          <div class="text-5xl mb-2 animate-spin">🌍</div>
+          <div class="text-6xl mb-3 globe-rotate">🌍</div>
           <p class="text-sky-200 font-semibold">Doc's doing the deep dive…</p>
-          <p class="text-xs text-slate-400 mt-1">Local knowledge, not tourist traps. This can take 30 seconds.</p>
+          <p class="text-xs text-slate-400 mt-1 mb-4">Local knowledge, not tourist traps. This can take 30 seconds.</p>
+          <div class="bg-slate-900/60 rounded-xl px-4 py-3 min-h-[60px] flex flex-col items-center justify-center">
+            <p class="text-xs text-slate-500 mb-1">while you wait…</p>
+            <p id="jokeSetup" class="text-sm text-sky-200 font-semibold"></p>
+            <p id="jokePunchline" class="text-xs text-amber-300 mt-1 italic"></p>
+          </div>
         </div>
 
         <!-- Error -->
@@ -437,6 +461,44 @@
             <p class="text-xs text-amber-300 font-semibold mb-1">Doc says:</p>
             <p class="text-sm text-amber-100 italic" id="packDocNotesText"></p>
           </div>
+        </div>
+
+        <!-- Compass & Map -->
+        <div class="mt-6 mb-6">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xl font-black text-white">Where Am I</h3>
+            <button class="btn btn-ghost text-xs" onclick="initLocation()">Find Me</button>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">Compass + location. Works offline — uses your device sensors.</p>
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div class="card-offline flex flex-col items-center justify-center py-4">
+              <canvas id="compassCanvas" width="120" height="120"></canvas>
+              <p class="text-xs text-slate-400 mt-2" id="compassHeading">Tap Find Me</p>
+              <button id="compassPermBtn" class="btn btn-ghost text-xs mt-2 hidden" onclick="requestCompassPermission()">Allow compass</button>
+            </div>
+            <div class="card-offline flex flex-col justify-center gap-2 text-sm">
+              <div>
+                <p class="text-xs text-slate-500">Latitude</p>
+                <p class="font-semibold text-teal-300" id="locLat">—</p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Longitude</p>
+                <p class="font-semibold text-teal-300" id="locLng">—</p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Accuracy</p>
+                <p class="text-sky-200 text-xs" id="locAccuracy">—</p>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">what3words area</p>
+                <p class="text-sky-200 text-xs" id="locW3W">tap Find Me</p>
+              </div>
+            </div>
+          </div>
+          <div id="mapContainer" class="rounded-xl overflow-hidden hidden" style="height:220px;">
+            <div id="leafletMap" style="height:100%;width:100%;"></div>
+          </div>
+          <p class="text-xs text-slate-500 mt-2" id="mapOfflineNote"></p>
         </div>
 
         <!-- Journal -->
@@ -1172,6 +1234,209 @@
     }
 
     init();
+
+    // ===== DAD JOKES =====
+    const FALLBACK_JOKES = [
+      { setup: "Why did the traveller bring a ladder?", punchline: "Because the prices were sky high." },
+      { setup: "What do you call a fish without eyes?", punchline: "A fsh." },
+      { setup: "Why don't scientists trust atoms?", punchline: "Because they make up everything." },
+      { setup: "What's a vampire's least favourite room?", punchline: "The living room." },
+      { setup: "Why did the scarecrow win an award?", punchline: "He was outstanding in his field." },
+      { setup: "What do you call cheese that isn't yours?", punchline: "Nacho cheese." },
+      { setup: "Why do cows wear bells?", punchline: "Because their horns don't work." },
+      { setup: "What do you call a sleeping dinosaur?", punchline: "A dino-snore." },
+      { setup: "Why can't you give Elsa a balloon?", punchline: "She'll let it go." },
+      { setup: "What do you call a parade of rabbits walking backwards?", punchline: "A receding hare-line." },
+    ];
+
+    let jokeInterval = null;
+
+    async function fetchJoke() {
+      try {
+        const res = await fetch('https://icanhazdadjoke.com/', { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(3000) });
+        const data = await res.json();
+        if (data.joke) {
+          const mid = Math.floor(data.joke.length / 2);
+          const split = data.joke.lastIndexOf(' ', mid);
+          return { setup: data.joke.slice(0, split), punchline: data.joke.slice(split + 1) };
+        }
+      } catch(e) {}
+      return FALLBACK_JOKES[Math.floor(Math.random() * FALLBACK_JOKES.length)];
+    }
+
+    async function showNextJoke() {
+      const joke = await fetchJoke();
+      const setupEl = document.getElementById('jokeSetup');
+      const punchEl = document.getElementById('jokePunchline');
+      if (!setupEl) return;
+      setupEl.textContent = joke.setup;
+      punchEl.textContent = joke.punchline;
+      setupEl.classList.remove('joke-animate');
+      punchEl.classList.remove('joke-animate');
+      void setupEl.offsetWidth; // reflow to restart animation
+      setupEl.classList.add('joke-animate');
+      punchEl.classList.add('joke-animate');
+    }
+
+    function startJokes() { showNextJoke(); jokeInterval = setInterval(showNextJoke, 5000); }
+    function stopJokes() { clearInterval(jokeInterval); jokeInterval = null; }
+
+    // Patch buildPack to start/stop jokes
+    const _origBuildPack = buildPack;
+    buildPack = async function() {
+      startJokes();
+      await _origBuildPack();
+      stopJokes();
+    };
+
+    // ===== COMPASS & LOCATION =====
+    let leafletMap = null;
+    let leafletMarker = null;
+    let compassWatching = false;
+
+    function drawCompass(degrees) {
+      const canvas = document.getElementById('compassCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const cx = 60, cy = 60, r = 54;
+      ctx.clearRect(0, 0, 120, 120);
+
+      // Outer ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(56,189,248,0.5)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Cardinal marks
+      const cardinals = [['N', 0], ['E', 90], ['S', 180], ['W', 270]];
+      cardinals.forEach(([label, deg]) => {
+        const rad = (deg - 90) * Math.PI / 180;
+        const x = cx + (r - 10) * Math.cos(rad);
+        const y = cy + (r - 10) * Math.sin(rad);
+        ctx.fillStyle = label === 'N' ? '#f87171' : '#94a3b8';
+        ctx.font = 'bold 10px system-ui';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, x, y);
+      });
+
+      // Needle
+      const needleRad = (degrees - 90) * Math.PI / 180;
+      // North (red)
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + 38 * Math.cos(needleRad), cy + 38 * Math.sin(needleRad));
+      ctx.strokeStyle = '#f87171';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      // South (white)
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx - 28 * Math.cos(needleRad), cy - 28 * Math.sin(needleRad));
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      // Centre dot
+      ctx.beginPath();
+      ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fill();
+    }
+
+    function requestCompassPermission() {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(state => {
+          if (state === 'granted') startCompass();
+        });
+      } else {
+        startCompass();
+      }
+    }
+
+    function startCompass() {
+      if (compassWatching) return;
+      compassWatching = true;
+      window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+      window.addEventListener('deviceorientation', handleOrientation, true);
+      document.getElementById('compassPermBtn').classList.add('hidden');
+    }
+
+    function handleOrientation(e) {
+      let degrees = e.alpha || 0;
+      if (e.webkitCompassHeading !== undefined) degrees = e.webkitCompassHeading; // iOS
+      const label = compassDirection(degrees);
+      drawCompass(degrees);
+      document.getElementById('compassHeading').textContent = Math.round(degrees) + '° ' + label;
+    }
+
+    function compassDirection(deg) {
+      const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+      return dirs[Math.round(deg / 45) % 8];
+    }
+
+    function initLocation() {
+      // Draw blank compass
+      drawCompass(0);
+
+      // Start compass
+      if (typeof DeviceOrientationEvent !== 'undefined') {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          document.getElementById('compassPermBtn').classList.remove('hidden');
+        } else {
+          startCompass();
+        }
+      }
+
+      // Geolocation
+      if (!navigator.geolocation) {
+        document.getElementById('locW3W').textContent = 'Geolocation not supported';
+        return;
+      }
+
+      document.getElementById('locLat').textContent = 'Finding…';
+      navigator.geolocation.getCurrentPosition(pos => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const acc = pos.coords.accuracy;
+
+        document.getElementById('locLat').textContent = lat.toFixed(5);
+        document.getElementById('locLng').textContent = lng.toFixed(5);
+        document.getElementById('locAccuracy').textContent = '±' + Math.round(acc) + 'm';
+        document.getElementById('locW3W').textContent = latLngToApproxW3W(lat, lng);
+
+        // Map
+        if (navigator.onLine) {
+          const mapContainer = document.getElementById('mapContainer');
+          mapContainer.classList.remove('hidden');
+          document.getElementById('mapOfflineNote').textContent = '';
+
+          if (!leafletMap) {
+            leafletMap = L.map('leafletMap', { zoomControl: true, attributionControl: false }).setView([lat, lng], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
+            leafletMarker = L.circleMarker([lat, lng], { radius: 8, color: '#38bdf8', fillColor: '#14b8a6', fillOpacity: 0.9 }).addTo(leafletMap);
+          } else {
+            leafletMap.setView([lat, lng], 15);
+            leafletMarker.setLatLng([lat, lng]);
+          }
+        } else {
+          document.getElementById('mapOfflineNote').textContent = 'Map needs internet. Coordinates saved above — works in any offline maps app.';
+        }
+      }, () => {
+        document.getElementById('locLat').textContent = 'Location denied';
+      }, { enableHighAccuracy: true, timeout: 10000 });
+    }
+
+    // Approximate what3words-style grid reference (not real w3w — just a grid cell label for offline use)
+    function latLngToApproxW3W(lat, lng) {
+      const latCells = ['alpha','bravo','charlie','delta','echo','foxtrot','golf','hotel','india','juliet','kilo','lima','mike','november','oscar','papa','quebec','romeo','sierra','tango','uniform','victor','whiskey','xray','yankee','zulu'];
+      const lngCells = ['amber','bronze','copper','denim','ember','flame','grove','haven','inlet','jungle','ketch','linden','marsh','noble','ocean','pebble','quarry','river','stone','timber','urban','valley','warden','xeric','yarrow','zenith'];
+      const latIdx = Math.abs(Math.floor((lat + 90) * latCells.length / 180)) % latCells.length;
+      const lngIdx = Math.abs(Math.floor((lng + 180) * lngCells.length / 360)) % lngCells.length;
+      const sub = Math.floor((lat % 1 + 1) * 100) % 100;
+      return latCells[latIdx] + '.' + lngCells[lngIdx] + '.' + sub;
+    }
   </script>
 </body>
 </html>
