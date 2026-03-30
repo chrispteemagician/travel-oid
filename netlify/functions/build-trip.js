@@ -37,7 +37,7 @@ exports.handler = async (event) => {
     const payload = {
       system_instruction: { parts: [{ text: buildSystemPrompt() }] },
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens: 8192 },
+      generationConfig: { maxOutputTokens: 4096, temperature: 0.7 },
     };
 
     let lastError = null;
