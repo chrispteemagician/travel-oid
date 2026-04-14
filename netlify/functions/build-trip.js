@@ -29,42 +29,43 @@ exports.handler = async (event) => {
 
     const prompt = `You are Doc, a well-travelled local friend. Build a tight offline travel pack for ${name} going to ${destination}${dates ? ' in ' + dates : ''}. Style: ${style}. Interests: ${interestList}.
 
-Reply ONLY with valid JSON, no markdown:
+RULES: Reply ONLY with valid JSON, no markdown, no commentary. MAX 2 items per array throughout. ONE sentence per text field. Real names, real costs, real lines only.
+
 {
   "title": "short title",
-  "summary": "2 sentences max — vibe and one thing to remember",
+  "summary": "one sentence — vibe + one thing to remember",
   "destination": "${destination}",
-  "transport": [{"label":"Airport to centre","method":"name","detail":"specific line, stop, time","cost":"€X"}],
-  "sim": {"advice":"where to buy, which network, cost","bestOption":"one clear pick"},
-  "neighbourhoods": [{"name":"name","vibe":"short","stayHere":true,"notes":"what to know"}],
-  "safety": ["specific tip","ND-friendly tip","money tip"],
-  "phrases": [{"en":"English","local":"local","phonetic":"how to say","use":"when"}],
+  "transport": [{"label":"Airport to centre","method":"name","detail":"line/stop/time","cost":"€X"},{"label":"City transport","method":"name","detail":"how","cost":"€X"}],
+  "sim": {"advice":"where+network+cost in one sentence","bestOption":"one pick"},
+  "neighbourhoods": [{"name":"name","vibe":"5 words","stayHere":true,"notes":"one tip"},{"name":"name","vibe":"5 words","stayHere":false,"notes":"one tip"}],
+  "safety": ["tip1","tip2","tip3"],
+  "phrases": [{"en":"English","local":"local","phonetic":"say it like","use":"when"},{"en":"English","local":"local","phonetic":"say it like","use":"when"},{"en":"English","local":"local","phonetic":"say it like","use":"when"}],
   "interests": {${safeInterests.includes("cannabis") ? `
-    "cannabis": {"legalStatus":"current status","howToAccess":"step by step for visitors","clubs":[{"name":"name","area":"area","notes":"how to join"}],"tips":["tip1"]}` : ""}${safeInterests.includes("bridgewalker") ? `${safeInterests.includes("cannabis") ? "," : ""}
-    "bridgewalker": {"spots":[{"name":"name","type":"type","area":"area","notes":"why"}],"tips":["tip1"]}` : ""}${safeInterests.includes("music") ? `,
-    "music": {"venues":[{"name":"name","type":"type","area":"area","notes":"notes"}],"tips":["tip1"]}` : ""}${safeInterests.includes("food") ? `,
-    "food": {"dishes":["dish1","dish2"],"spots":[{"name":"name","area":"area","type":"type","notes":"why locals go"}],"tips":["tip1"]}` : ""}${safeInterests.includes("photography") ? `,
-    "photography": {"spots":[{"name":"name","area":"area","notes":"best time, what's special"}],"tips":["tip1"]}` : ""}${safeInterests.includes("coins") ? `,
-    "coins": {"shops":[{"name":"name","area":"area","notes":"what they stock"}],"tips":["tip1"]}` : ""}},
-  "emergency": {"police":"number","medical":"hospital info","embassy":"UK embassy if applicable","lostPassport":"what to do"},
-  "docNotes": "1 sentence of pure Doc wisdom about this place"
-}
-
-Be specific. Real names, real costs, real lines. Keep phrases to 6. Keep safety to 4 bullets. Keep neighbourhoods to 2.`;
+    "cannabis": {"legalStatus":"one sentence","howToAccess":"one sentence","clubs":[{"name":"name","area":"area","notes":"one tip"},{"name":"name","area":"area","notes":"one tip"}],"tips":["tip1","tip2"]}` : ""}${safeInterests.includes("bridgewalker") ? `${safeInterests.includes("cannabis") ? "," : ""}
+    "bridgewalker": {"spots":[{"name":"name","type":"type","area":"area","notes":"one line"},{"name":"name","type":"type","area":"area","notes":"one line"}],"tips":["tip1","tip2"]}` : ""}${safeInterests.includes("music") ? `,
+    "music": {"venues":[{"name":"name","type":"type","area":"area","notes":"one line"},{"name":"name","type":"type","area":"area","notes":"one line"}],"tips":["tip1","tip2"]}` : ""}${safeInterests.includes("food") ? `,
+    "food": {"dishes":["dish1","dish2"],"spots":[{"name":"name","area":"area","type":"type","notes":"one line"},{"name":"name","area":"area","type":"type","notes":"one line"}],"tips":["tip1","tip2"]}` : ""}${safeInterests.includes("photography") ? `,
+    "photography": {"spots":[{"name":"name","area":"area","notes":"best time + why"},{"name":"name","area":"area","notes":"best time + why"}],"tips":["tip1","tip2"]}` : ""}${safeInterests.includes("coins") ? `,
+    "coins": {"shops":[{"name":"name","area":"area","notes":"one line"},{"name":"name","area":"area","notes":"one line"}],"tips":["tip1","tip2"]}` : ""}},
+  "emergency": {"police":"number","medical":"hospital name","embassy":"UK embassy or N/A","lostPassport":"one sentence"},
+  "docNotes": "one sentence of pure Doc wisdom"
+}`;
 
     const payload = {
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens: 6000, temperature: 0.7 },
+      generationConfig: { maxOutputTokens: 4000, temperature: 0.7 },
     };
 
     let lastError = null;
     for (let attempt = 0; attempt < 3; attempt++) {
       if (attempt > 0) await new Promise(r => setTimeout(r, 1000 * attempt));
       try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 20000);
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-          { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }
-        );
+          { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), signal: controller.signal }
+        ).finally(() => clearTimeout(timeout));
         if (!res.ok) {
           const text = await res.text();
           lastError = new Error(`Gemini ${res.status}: ${text}`);
