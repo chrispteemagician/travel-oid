@@ -238,6 +238,7 @@
     <button class="dot-nav-dot" data-section="pageTrip" data-label="Trip AI" onclick="scrollToSection('pageTrip')"></button>
     <button class="dot-nav-dot" data-section="pageDoc" data-label="Doc" onclick="scrollToSection('pageDoc')"></button>
     <button class="dot-nav-dot" data-section="pageGear" data-label="Gear" onclick="scrollToSection('pageGear')"></button>
+    <button class="dot-nav-dot" data-section="pageMesh" data-label="Mesh" onclick="scrollToSection('pageMesh')"></button>
     <button class="dot-nav-dot" data-section="pageVillage" data-label="-Oid" onclick="scrollToSection('pageVillage')"></button>
   </nav>
 
@@ -269,6 +270,7 @@
         <button class="nav-pill" data-section="pageTrip" onclick="scrollToSection('pageTrip')">Trip AI</button>
         <button class="nav-pill" data-section="pageDoc" onclick="scrollToSection('pageDoc')">Doc</button>
         <button class="nav-pill" data-section="pageGear" onclick="scrollToSection('pageGear')">Gear</button>
+        <button class="nav-pill" data-section="pageMesh" onclick="scrollToSection('pageMesh')">Mesh</button>
         <button class="nav-pill" data-section="pageVillage" onclick="scrollToSection('pageVillage')">Village</button>
         <div class="ml-auto flex items-center gap-1 pr-1 shrink-0">
           <span class="online-dot online" id="onlineDot"></span>
@@ -682,6 +684,110 @@
               <li><a href="https://www.amazon.co.uk/s?k=packing+cubes&tag=chrisptee-21" target="_blank" class="underline text-sky-300">Packing cubes</a></li>
             </ul>
           </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Mesh CB -->
+    <div id="pageMesh" class="snap-page">
+      <section class="section-fade mb-8">
+        <h2 class="text-3xl font-black text-white mb-1">Mesh CB</h2>
+        <p class="text-sky-300 mb-1">Off-grid LoRa comms for travellers. No SIM. No internet. Just the mesh.</p>
+        <p class="text-xs text-slate-400 mb-3">Primary: MeshCore &nbsp;·&nbsp; Secondary: Meshtastic &nbsp;·&nbsp; UK/EU freq: 869.525 MHz</p>
+        <a href="https://meshcb.co.uk" target="_blank" rel="noopener" class="flex items-center gap-3 rounded-2xl px-4 py-3 mb-5 text-sm font-semibold text-white transition hover:opacity-90" style="background: linear-gradient(135deg, rgba(20,184,166,0.25), rgba(56,189,248,0.15)); border: 1px solid rgba(20,184,166,0.5);">
+          <span class="text-2xl">📻</span>
+          <span class="flex-1">meshcb.co.uk — the full guide</span>
+          <span class="text-teal-300 text-xs">↗</span>
+        </a>
+
+        <!-- MeshCore — PRIMARY -->
+        <div class="card mb-4 border-teal-500/60" style="border-color: rgba(20,184,166,0.5);">
+          <div class="flex items-start gap-3 mb-3">
+            <div class="text-3xl mt-0.5">📡</div>
+            <div>
+              <p class="font-bold text-teal-300 text-lg leading-tight">MeshCore</p>
+              <p class="text-xs text-teal-200/70 font-semibold uppercase tracking-wide">Primary · UK go-to</p>
+            </div>
+          </div>
+          <p class="text-sm text-slate-200 mb-3">MeshCore is the recommended LoRa operating firmware for UK travellers. Lightweight, low-power, and built for real-world mesh deployments — it's the backbone of the UK community mesh network.</p>
+          <div class="grid md:grid-cols-2 gap-3 mb-3 text-xs">
+            <div class="bg-slate-900/60 rounded-xl p-3">
+              <p class="text-teal-300 font-semibold mb-1">UK setup</p>
+              <ul class="text-slate-300 space-y-1 list-disc pl-4">
+                <li>Frequency: <span class="text-white font-mono">869.525 MHz</span> (EU 868 band)</li>
+                <li>Spreading Factor: SF10 / BW250</li>
+                <li>Max TX power: 25 mW (EU limit)</li>
+                <li>Default channel: <span class="text-white font-mono">MeshCore UK</span></li>
+              </ul>
+            </div>
+            <div class="bg-slate-900/60 rounded-xl p-3">
+              <p class="text-teal-300 font-semibold mb-1">Why MeshCore?</p>
+              <ul class="text-slate-300 space-y-1 list-disc pl-4">
+                <li>Store-and-forward messaging</li>
+                <li>Repeater / router node support</li>
+                <li>Low battery drain</li>
+                <li>Active UK community</li>
+              </ul>
+            </div>
+          </div>
+          <div class="bg-slate-900/60 rounded-xl p-3 mb-3 text-xs">
+            <p class="text-teal-300 font-semibold mb-1">Compatible hardware</p>
+            <p class="text-slate-300">LilyGO T-Beam, Heltec V3, RAK WisBlock, TTGO LoRa32 — any ESP32 + SX1276/SX1262 combo. Flash via <span class="font-mono text-white">meshcore.app</span> web installer.</p>
+          </div>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <a href="https://meshcore.co.uk" target="_blank" rel="noopener" class="btn btn-ghost text-xs py-1 px-3">meshcore.co.uk</a>
+            <a href="https://github.com/ripplebiz/MeshCore" target="_blank" rel="noopener" class="btn btn-ghost text-xs py-1 px-3">GitHub</a>
+            <a href="https://www.amazon.co.uk/s?k=lilygo+t-beam+lora&tag=chrisptee-21" target="_blank" rel="noopener" class="btn btn-ghost text-xs py-1 px-3">Buy T-Beam (UK)</a>
+          </div>
+        </div>
+
+        <!-- Meshtastic — SECONDARY -->
+        <div class="card mb-4 border-sky-600/40">
+          <div class="flex items-start gap-3 mb-3">
+            <div class="text-3xl mt-0.5">🔭</div>
+            <div>
+              <p class="font-bold text-sky-300 text-lg leading-tight">Meshtastic</p>
+              <p class="text-xs text-sky-200/70 font-semibold uppercase tracking-wide">Secondary · global fallback</p>
+            </div>
+          </div>
+          <p class="text-sm text-slate-200 mb-3">Meshtastic is the most widely deployed LoRa mesh firmware worldwide. If you're travelling outside the UK where MeshCore nodes are sparse, Meshtastic gives you the best chance of hitting an existing node.</p>
+          <div class="grid md:grid-cols-2 gap-3 mb-3 text-xs">
+            <div class="bg-slate-900/60 rounded-xl p-3">
+              <p class="text-sky-300 font-semibold mb-1">When to use it</p>
+              <ul class="text-slate-300 space-y-1 list-disc pl-4">
+                <li>Travel outside the UK</li>
+                <li>Group trips needing GPS sharing</li>
+                <li>Festival / event comms</li>
+                <li>Linking with non-MeshCore users</li>
+              </ul>
+            </div>
+            <div class="bg-slate-900/60 rounded-xl p-3">
+              <p class="text-sky-300 font-semibold mb-1">Key difference</p>
+              <ul class="text-slate-300 space-y-1 list-disc pl-4">
+                <li>Larger global node network</li>
+                <li>Phone-first BLE app</li>
+                <li>Built-in GPS mapping</li>
+                <li>Heavier firmware footprint</li>
+              </ul>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <a href="https://meshtastic.org" target="_blank" rel="noopener" class="btn btn-ghost text-xs py-1 px-3">meshtastic.org</a>
+            <a href="https://meshtastic.org/docs/hardware/" target="_blank" rel="noopener" class="btn btn-ghost text-xs py-1 px-3">Hardware guide</a>
+          </div>
+        </div>
+
+        <!-- Travel tips -->
+        <div class="card text-sm">
+          <h3 class="text-sky-100 font-semibold mb-2">Mesh CB travel tips</h3>
+          <ul class="text-slate-300 space-y-2 text-xs list-disc pl-4">
+            <li>Flash MeshCore before you leave. Don't faff with firmware at the airport.</li>
+            <li>Set a private channel key with your travel group so messages stay yours.</li>
+            <li>In the UK, check the <span class="text-teal-300">MeshCore map</span> for local repeaters — coverage is growing fast.</li>
+            <li>Carry a power bank. LoRa nodes idle happily on 100–200 mA but you'll want continuous uptime.</li>
+            <li>Outside the UK, switch the frequency preset to match the region (US: 915 MHz, EU: 868 MHz, AU: 915 MHz).</li>
+            <li>Meshtastic and MeshCore use different protocols — they can't hear each other. Know which network your group is on.</li>
+          </ul>
         </div>
       </section>
     </div>
